@@ -43,6 +43,9 @@ public class Interest extends FieldValue {
 	// List of Projects who have this Interest as a research area
 	@ManyToMany(mappedBy = "project_area")
 	private List<Project> projects;
+
+	@Version
+	long version = 0;
 	
 	Interest() {
 		

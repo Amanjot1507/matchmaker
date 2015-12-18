@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
 /*
  * This class represent a student's settings for things such as:
@@ -35,6 +36,10 @@ public class StudentSettings {
 			joinColumns = {@JoinColumn(name="SET_ID", referencedColumnName="ID")},
 			inverseJoinColumns = {@JoinColumn(name="PROJ_ID", referencedColumnName="ID")}
 	)
+
+	@Version
+	long version = 0;
+
 	private List<Project> hiddenProjects;
 	
 	public StudentSettings(){

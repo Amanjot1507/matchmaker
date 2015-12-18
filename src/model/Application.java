@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import util.Sanitization;
+import javax.persistence.LockModeType;
+import javax.persistence.Version;
 
 
 /**
@@ -62,6 +64,9 @@ public class Application implements Serializable {
 	@Column(name = "SUBMITTED")
 	@Temporal(TemporalType.DATE)
 	private Date submissionDate;
+
+	@Version
+	long version = 0;
 	
 	Application() {
 

@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.LockModeType;
 
 public class UserController {
 
@@ -24,6 +25,7 @@ public class UserController {
 	public static void deleteUser(EntityManager em, User u) {
 	    EntityTransaction tx = em.getTransaction();
 		if (u != null) {
+			em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 			Student s = u.getStudent();
 			Researcher r = u.getResearcher();
 			System.out.println(s);
@@ -64,6 +66,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		u.setName(name);
 		tx.commit();
 	}
@@ -74,6 +77,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		u.setEmail(email);
 		tx.commit();
 	}
@@ -84,6 +88,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		u.setAdmin(makeAdmin);
 		tx.commit();
 	}
@@ -94,6 +99,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		u.setStudent(stud);
 		tx.commit();
 	}
@@ -104,6 +110,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		u.setResearcher(r);
 		tx.commit();
 	}
@@ -114,6 +121,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		Student s = u.setStudent(null);
 		em.remove(s);
 		tx.commit();
@@ -125,6 +133,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
+	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
 		Researcher r = u.setResearcher(null);
 		em.remove(r);
 		tx.commit();

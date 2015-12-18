@@ -33,6 +33,9 @@ public class College extends FieldValue {
 	// List of the students within this College
 	@ManyToMany(mappedBy = "colleges")
 	private List<Student> students;
+
+	@Version
+	long version = 0;
 	
 	College() {
 		

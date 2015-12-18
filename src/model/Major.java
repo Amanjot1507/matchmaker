@@ -34,6 +34,9 @@ public class Major extends FieldValue {
 	// List of Students in this Major
 	@ManyToMany(mappedBy = "majors")
 	private List<Student> students;
+
+	@Version
+	long version = 0;
 	
 	Major() {
 		

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.LockModeType;
+
 
 
 
@@ -22,7 +24,8 @@ public class ApplicationController {
 		}
 		
 		tx.begin();
-		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		Application a = new Application(s, p, studentResponse);
 		s.addApplication(a);
 		p.addApplication(a);
@@ -37,6 +40,7 @@ public class ApplicationController {
 		tx.begin();
 		
 		if (a != null) {
+			em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 			if (a.getApplicationProject() != null) {
 				a.getApplicationProject().removeApplication(a);
 			}
@@ -56,6 +60,7 @@ public class ApplicationController {
 			return;
 		}
 		
+		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 		a.setStatus(ApplicationStatus.Accepted);
 		
 		tx.commit();
@@ -67,6 +72,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
+		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 		a.setStatus(ApplicationStatus.Invited);
 		
 		tx.commit();
@@ -78,6 +84,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
+		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 		a.setStatus(ApplicationStatus.Pending);
 		a.setStudentResponse(response);
 		
@@ -91,6 +98,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
+		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 		a.setStatus(ApplicationStatus.Declined);
 		
 		tx.commit();
@@ -103,6 +111,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
+		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
 		a.setStudentResponse(response);
 		
 		tx.commit();

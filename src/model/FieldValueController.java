@@ -10,6 +10,7 @@ import javax.persistence.EntityTransaction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import javax.persistence.LockModeType;
 import org.json.JSONObject;
 
 public class FieldValueController{
@@ -49,6 +50,7 @@ public class FieldValueController{
 		if (value == null) {
 			return;
 		}
+		em.lock(value, LockModeType.PESSIMISTIC_WRITE);
 		value.removeElements();
 		String description = value.getDescription();
 		String type = FieldFactory.getType(value);
@@ -94,6 +96,8 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+
 		item.setDescription(newDescription);
 		
 		tx.commit();
@@ -109,6 +113,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.addStudent(s);
 		
 		tx.commit();
@@ -123,6 +128,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.removeStudent(s);
 		
 		tx.commit();
@@ -138,6 +144,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.addResearcher(r);
 		
 		tx.commit();
@@ -154,6 +161,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.removeResearcher(r);
 		
 		tx.commit();
@@ -169,6 +177,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.addProject(p);
 		
 		tx.commit();
@@ -184,6 +193,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
+		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
 		item.removeProject(p);
 		
 		tx.commit();

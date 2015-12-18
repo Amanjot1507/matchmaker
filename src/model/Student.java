@@ -138,6 +138,9 @@ public class Student implements Serializable {
 	@ManyToMany (mappedBy = "hiddenStudents")
 	private List<ResearcherSettings> hiddenByResearcher;
 
+	@Version
+	long version = 0;
+
 	Student() 
 	{
 		

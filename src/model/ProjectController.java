@@ -11,6 +11,7 @@ import javax.persistence.EntityTransaction;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import javax.persistence.LockModeType;
 
 public class ProjectController {
 	
@@ -31,6 +32,7 @@ public class ProjectController {
 		}
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
+		em.lock(researcher, LockModeType.PESSIMISTIC_WRITE);
 		ArrayList<Researcher> rlist = new ArrayList<Researcher>();
 		rlist.add(researcher);
 
@@ -65,7 +67,8 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
-	
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+
 		// Delete applications
 		List<Application> toDelete = p.removeApplications();
 		tx.commit();
@@ -73,6 +76,7 @@ public class ProjectController {
 			ApplicationController.deleteApplication(em, a);
 		}
 		tx.begin();
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		// Remove pointers to this project
 		p.removeRequiredSkills();
 		p.removeResearchers();
@@ -91,6 +95,7 @@ public class ProjectController {
 		}
 		tx.begin();
 
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.updateProject(name,description,url,researcher,area,skills);
 
 		em.persist(p);
@@ -106,6 +111,7 @@ public class ProjectController {
 		}
 		tx.begin();
 
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.updateProject(name,description,url,researcher,area,skills);
 
 		em.persist(p);
@@ -122,6 +128,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.setName(name);
 		
 		tx.commit();
@@ -134,6 +141,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.setDescription(desc);
 		
 		tx.commit();
@@ -145,7 +153,7 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
-		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.setURL(url);
 		
 		tx.commit();
@@ -165,6 +173,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.addResearcher(r);
 		
 		tx.commit();
@@ -177,6 +186,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		p.removeResearcher(r);
 		
 		tx.commit();
@@ -228,6 +238,7 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
+		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
 		List<Application> declined = new LinkedList<Application>();
 		for (Application a : p.getApplications()) {
 			if (a.getStatus() == ApplicationStatus.Declined) {

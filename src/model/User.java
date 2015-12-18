@@ -24,6 +24,9 @@ public class User {
 	@OneToOne
 	@JoinColumn(nullable = true)
 	private Researcher researcher;
+
+	@Version
+	long version = 0;
 	
 	public User() {
 		

@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 /**
  * 
@@ -44,6 +45,9 @@ public class LatestAddition {
 	@Column(name="SUBMISSIONDATE", updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date submissionDate;
+
+	@Version
+	long version = 0;
 	
 	LatestAddition() {
 		submissionDate = null;

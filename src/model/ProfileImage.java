@@ -41,6 +41,9 @@ public class ProfileImage {
 
 	@OneToOne (mappedBy = "photo")
 	private Researcher researcher;
+
+	@Version
+	long version = 0;
 	
 	public ProfileImage() {
 

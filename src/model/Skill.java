@@ -38,6 +38,9 @@ public class Skill extends FieldValue {
 	// List of Projects requiring this Skill
 	@ManyToMany (mappedBy = "requiredSkills")
 	private List<Project> projects;
+
+	@Version
+	long version = 0;
 	
 	Skill() {
 		

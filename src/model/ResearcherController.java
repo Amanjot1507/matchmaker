@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.LockModeType;
 
 public class ResearcherController {
 
@@ -23,6 +24,9 @@ public class ResearcherController {
         Researcher r = new Researcher(name, netID, email, departments,
         				webpage, researchArea);
         ResearcherSettings settings = new ResearcherSettings();
+        
+        em.lock(user, LockModeType.PESSIMISTIC_WRITE);
+
         r.setSettings(settings);
 		settings.setResearcher(r);
         user.setResearcher(r);
@@ -47,6 +51,7 @@ public class ResearcherController {
 		tx.begin();
 		if (r != null) {
 			// Delete projects if sole project leader
+			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 			List<Project> toDelete = r.removeProjects();
 			tx.commit();
 			for (Project p : toDelete) {
@@ -55,11 +60,17 @@ public class ResearcherController {
 				}
 			}
 			tx.begin();
-			
+			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 			// Removes incoming pointers to researcher
+
+			/*
+			 * Explicit variables used because they have to be locked.
+			 */
 			r.removeDepartments();
 			r.removeResearchAreas();
+
 			r.getUser().setResearcher(null);
+			
 			r.getSettings().removeStudents();
 			r.getSettings().setResearcher(null);
 			
@@ -81,8 +92,10 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		r.getSettings().addStudent(s);
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		
+		r.getSettings().addStudent(s);
+
 		tx.commit();
 	}
 	
@@ -93,6 +106,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.getSettings().removeStudent(s);
 		
 		tx.commit();
@@ -143,6 +157,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.addProject(p);
 		
 		tx.commit();
@@ -155,6 +170,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.setName(name);
 		
 		tx.commit();
@@ -166,6 +182,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.setEmail(email);
 		
 		tx.commit();
@@ -177,6 +194,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.setWebpage(webpage);
 		
 		tx.commit();
@@ -187,6 +205,7 @@ public class ResearcherController {
 		}
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.removeDepartments();
 		tx.commit();
 		System.out.println("Deleted all departments");
@@ -211,7 +230,9 @@ public class ResearcherController {
 			return;
 		}
 		tx.begin();
+		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 		r.addDepartment(dep);
+
 		tx.commit();
 	}
 		public static void editArea(EntityManager em, Researcher r, String ids) throws InstantiationException, IllegalAccessException {
@@ -220,6 +241,7 @@ public class ResearcherController {
 			}
 			EntityTransaction tx = em.getTransaction();
 			tx.begin();
+			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 			r.removeResearchAreas();
 			tx.commit();
 			String[] idList = ids.split(",");
@@ -244,6 +266,7 @@ public class ResearcherController {
 				return;
 			}
 			tx.begin();
+			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
 			r.addResearchArea(a);
 			tx.commit();
 		}

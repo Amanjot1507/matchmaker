@@ -65,6 +65,9 @@ public class Project implements Serializable {
 	private List<Application> applications;
 	@ManyToMany (mappedBy = "hiddenProjects")
 	private List<StudentSettings> hiddenBy;
+
+	@Version
+	long version = 0;
 	
 	public Project() {
 		

@@ -11,6 +11,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.LockModeType;
 
 public class StudentController {
 	
@@ -25,6 +26,8 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(user, LockModeType.PESSIMISTIC_WRITE);
+
 		Student s = new Student(name, netID, gpa, email, year, colleges, majors,
 				minors, skills, priorExperience, interests, transcript, user);
 		StudentSettings set = new StudentSettings();
@@ -43,6 +46,7 @@ public class StudentController {
 		tx.begin();
 		if (s != null) {
 			// Remove Applications
+			em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 			List<Application> toDelete = s.removeApplications();
 			tx.commit();
 			for (Application a : toDelete) {
@@ -50,6 +54,7 @@ public class StudentController {
 			}
 			tx.begin();
 			
+			em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 			// Remove incoming pointers
 			s.removeColleges();
 			s.removeInterests();
@@ -103,6 +108,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.setName(name);
 		
 		tx.commit();
@@ -115,6 +121,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.setEmail(email);
 		
 		tx.commit();
@@ -127,6 +134,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		if (gpa < 0) {
 			s.setGpa(0);
 		}
@@ -144,6 +152,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.setYear(year);
 		
 		tx.commit();
@@ -155,7 +164,8 @@ public class StudentController {
 			return;
 		}
 		tx.begin();
-		
+
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
 		s.addCollege(c);
 		
 		tx.commit();
@@ -168,6 +178,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeCollege(c);
 		
 		tx.commit();
@@ -180,6 +191,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.addMajor(m);
 		
 		tx.commit();
@@ -192,6 +204,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeMajor(m);
 		
 		tx.commit();
@@ -245,6 +258,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.addMinor(m);
 		
 		tx.commit();
@@ -256,6 +270,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeMinor(m);
 		
 		tx.commit();
@@ -267,7 +282,8 @@ public class StudentController {
 			return;
 		}
 		tx.begin();
-		
+
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
 		s.addSkill(sk);
 		
 		tx.commit();
@@ -280,6 +296,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeSkill(sk);
 		
 		tx.commit();
@@ -292,6 +309,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.addInterest(i);
 		
 		tx.commit();
@@ -304,6 +322,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeInterest(i);
 		
 		tx.commit();
@@ -319,6 +338,8 @@ public class StudentController {
 		
 		Experience exp = new Experience(startDate, endDate, jobTitle, location,
 				description);
+
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.addExperience(exp);
 		
 		tx.commit();
@@ -332,6 +353,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeExperience(e);
 		
 		tx.commit();
@@ -345,6 +367,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
 		e.setStartDate(startDate);
 		
 		tx.commit();
@@ -357,6 +380,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
 		e.setStartDate(endDate);
 		
 		tx.commit();
@@ -369,6 +393,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
 		e.setJobTitle(jobTitle);
 		
 		tx.commit();
@@ -381,6 +406,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
 		e.setLocation(location);
 		
 		tx.commit();
@@ -393,6 +419,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
 		e.setDescription(description);
 		
 		tx.commit();
@@ -405,6 +432,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
 		c.setCoursenum(coursenum);
 		
 		tx.commit();
@@ -417,6 +445,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
 		c.setTitle(title);
 		
 		tx.commit();
@@ -429,6 +458,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
 		c.setGrade(grade);
 		
 		tx.commit();
@@ -441,6 +471,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
 		c.setSemester(semester);
 		
 		tx.commit();
@@ -453,6 +484,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.addApplication(a);
 		
 		tx.commit();
@@ -465,6 +497,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
 		s.removeApplication(a);
 		
 		tx.commit();
@@ -477,6 +510,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
 		s.getSettings().addProject(p);
 		
 		tx.commit();
@@ -489,6 +523,8 @@ public class StudentController {
 		}
 		tx.begin();
 		
+		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+
 		s.getSettings().removeProject(p);
 		
 		tx.commit();

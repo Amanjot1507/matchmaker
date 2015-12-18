@@ -53,6 +53,9 @@ public class Researcher implements Serializable {
 	@OneToOne
 	@JoinColumn
 	private ProfileImage photo;
+
+	@Version
+	long version = 0;
 	
 	public Researcher() {
 		

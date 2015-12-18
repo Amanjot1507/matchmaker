@@ -33,6 +33,9 @@ public class Department extends FieldValue {
 	// List of the researchers within this Department
 	@ManyToMany(mappedBy = "departments")
 	private List<Researcher> researchers;
+
+	@Version
+	long version = 0;
 	
 	Department() {
 		
