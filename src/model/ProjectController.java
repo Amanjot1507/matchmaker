@@ -32,7 +32,7 @@ public class ProjectController {
 		}
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
-		em.lock(researcher, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(researcher, LockModeType.OPTIMISTIC);
 		ArrayList<Researcher> rlist = new ArrayList<Researcher>();
 		rlist.add(researcher);
 
@@ -67,7 +67,7 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 
 		// Delete applications
 		List<Application> toDelete = p.removeApplications();
@@ -76,7 +76,7 @@ public class ProjectController {
 			ApplicationController.deleteApplication(em, a);
 		}
 		tx.begin();
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		// Remove pointers to this project
 		p.removeRequiredSkills();
 		p.removeResearchers();
@@ -95,7 +95,7 @@ public class ProjectController {
 		}
 		tx.begin();
 
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.updateProject(name,description,url,researcher,area,skills);
 
 		em.persist(p);
@@ -111,7 +111,7 @@ public class ProjectController {
 		}
 		tx.begin();
 
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.updateProject(name,description,url,researcher,area,skills);
 
 		em.persist(p);
@@ -128,7 +128,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.setName(name);
 		
 		tx.commit();
@@ -141,7 +141,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.setDescription(desc);
 		
 		tx.commit();
@@ -153,7 +153,7 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.setURL(url);
 		
 		tx.commit();
@@ -173,7 +173,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.addResearcher(r);
 		
 		tx.commit();
@@ -186,7 +186,7 @@ public class ProjectController {
 		}
 		tx.begin();
 		
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		p.removeResearcher(r);
 		
 		tx.commit();
@@ -207,9 +207,12 @@ public class ProjectController {
 	}
 	
 	public static List<Project> getProjectList(EntityManager em) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
         try {
         String query = "select r from Project r";
-        List<Project> mylist = (List<Project>) em.createQuery(query).getResultList();
+        List<Project> mylist = (List<Project>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
         	return mylist;
         }
         catch (Exception e) {
@@ -219,10 +222,11 @@ public class ProjectController {
 	
 	public static Project getProjectById(EntityManager em,String id) {
         EntityTransaction tx = em.getTransaction();
+        tx.begin();
         try {
         String query = "select r from Project r where r.id = " + id;
-        List<Project> mylist = (List<Project>) em.createQuery(query).getResultList();
-        	
+        List<Project> mylist = (List<Project>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -238,7 +242,7 @@ public class ProjectController {
 			return;
 		}
 		tx.begin();
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
 		List<Application> declined = new LinkedList<Application>();
 		for (Application a : p.getApplications()) {
 			if (a.getStatus() == ApplicationStatus.Declined) {

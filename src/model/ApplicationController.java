@@ -24,8 +24,8 @@ public class ApplicationController {
 		}
 		
 		tx.begin();
-		em.lock(p, LockModeType.PESSIMISTIC_WRITE);
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(p, LockModeType.OPTIMISTIC);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		Application a = new Application(s, p, studentResponse);
 		s.addApplication(a);
 		p.addApplication(a);
@@ -40,7 +40,7 @@ public class ApplicationController {
 		tx.begin();
 		
 		if (a != null) {
-			em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(a, LockModeType.OPTIMISTIC);
 			if (a.getApplicationProject() != null) {
 				a.getApplicationProject().removeApplication(a);
 			}
@@ -60,7 +60,7 @@ public class ApplicationController {
 			return;
 		}
 		
-		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(a, LockModeType.OPTIMISTIC);
 		a.setStatus(ApplicationStatus.Accepted);
 		
 		tx.commit();
@@ -72,7 +72,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
-		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(a, LockModeType.OPTIMISTIC);
 		a.setStatus(ApplicationStatus.Invited);
 		
 		tx.commit();
@@ -84,7 +84,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
-		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(a, LockModeType.OPTIMISTIC);
 		a.setStatus(ApplicationStatus.Pending);
 		a.setStudentResponse(response);
 		
@@ -98,7 +98,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
-		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(a, LockModeType.OPTIMISTIC);
 		a.setStatus(ApplicationStatus.Declined);
 		
 		tx.commit();
@@ -111,7 +111,7 @@ public class ApplicationController {
 		}
 		tx.begin();
 		
-		em.lock(a, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(a, LockModeType.OPTIMISTIC);
 		a.setStudentResponse(response);
 		
 		tx.commit();
@@ -120,9 +120,10 @@ public class ApplicationController {
 	public static List<Application> getApplicationList (EntityManager em){
         EntityTransaction tx = em.getTransaction();
         try {
+        tx.begin();
         String query = "select a from APPLICATION a";
-        List<Application> mylist = (List<Application>) em.createQuery(query).getResultList();
-        
+        List<Application> mylist = (List<Application>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
         	return mylist;
         }
         catch (Exception e) {
@@ -134,9 +135,10 @@ public class ApplicationController {
 	public static Application getApplicationById(EntityManager em,String id) {
         EntityTransaction tx = em.getTransaction();
         try {
+        tx.begin();
         String query = "select a FROM APPLICATION a WHERE a.id = "+ id;
-        List<Application> mylist = (List<Application>) em.createQuery(query).getResultList();
-        	
+        List<Application> mylist = (List<Application>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {

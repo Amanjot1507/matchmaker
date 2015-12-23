@@ -26,7 +26,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(user, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(user, LockModeType.OPTIMISTIC);
 
 		Student s = new Student(name, netID, gpa, email, year, colleges, majors,
 				minors, skills, priorExperience, interests, transcript, user);
@@ -46,7 +46,7 @@ public class StudentController {
 		tx.begin();
 		if (s != null) {
 			// Remove Applications
-			em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(s, LockModeType.OPTIMISTIC);
 			List<Application> toDelete = s.removeApplications();
 			tx.commit();
 			for (Application a : toDelete) {
@@ -54,7 +54,7 @@ public class StudentController {
 			}
 			tx.begin();
 			
-			em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(s, LockModeType.OPTIMISTIC);
 			// Remove incoming pointers
 			s.removeColleges();
 			s.removeInterests();
@@ -77,10 +77,11 @@ public class StudentController {
 	
 	public static Student getStudentByNetID(EntityManager em, String netid) {
         EntityTransaction tx = em.getTransaction();
-        
+        tx.begin();
         String query = "select s from STUDENT s where s.netID = \"" + netid +"\"";
-        List<Student> mylist = (List<Student>) em.createQuery(query).getResultList();
+        List<Student> mylist = (List<Student>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -90,10 +91,11 @@ public class StudentController {
 	
 	public static Student getStudentByName(EntityManager em, String name) {
         EntityTransaction tx = em.getTransaction();
-        
+        tx.begin();
         String query = "select s from STUDENT s where s.name= \"" + name +"\"";
-        List<Student> mylist = (List<Student>) em.createQuery(query).getResultList();
+        List<Student> mylist = (List<Student>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -108,7 +110,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.setName(name);
 		
 		tx.commit();
@@ -121,7 +123,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.setEmail(email);
 		
 		tx.commit();
@@ -134,7 +136,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		if (gpa < 0) {
 			s.setGpa(0);
 		}
@@ -152,7 +154,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.setYear(year);
 		
 		tx.commit();
@@ -165,7 +167,7 @@ public class StudentController {
 		}
 		tx.begin();
 
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
+		em.lock(s, LockModeType.OPTIMISTIC);		
 		s.addCollege(c);
 		
 		tx.commit();
@@ -178,7 +180,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeCollege(c);
 		
 		tx.commit();
@@ -191,7 +193,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.addMajor(m);
 		
 		tx.commit();
@@ -204,23 +206,27 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeMajor(m);
 		
 		tx.commit();
 	}
 	public static void update(EntityManager em, Student s, String ids, String type) 
 			throws InstantiationException, IllegalAccessException {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		System.out.println("Updating "+type);
 		if (s == null) {
 			return;
 		}
 		String[] idList =ids.split(",");
 		s.remove(type);
+		tx.commit();
 		for (String id : idList) {
 			if (id.length()>0){
 				try {
 					StudentController.add(em, s, FieldValueController.getFieldValueById(em,Long.parseLong(id),type));
+					
 				}
 				catch(NumberFormatException e){
 					StudentController.add(em, s, FieldValueController.createFieldValue(em, id, type));
@@ -258,7 +264,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.addMinor(m);
 		
 		tx.commit();
@@ -270,7 +276,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeMinor(m);
 		
 		tx.commit();
@@ -283,7 +289,7 @@ public class StudentController {
 		}
 		tx.begin();
 
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
+		em.lock(s, LockModeType.OPTIMISTIC);		
 		s.addSkill(sk);
 		
 		tx.commit();
@@ -296,7 +302,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeSkill(sk);
 		
 		tx.commit();
@@ -309,7 +315,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.addInterest(i);
 		
 		tx.commit();
@@ -322,7 +328,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeInterest(i);
 		
 		tx.commit();
@@ -339,7 +345,7 @@ public class StudentController {
 		Experience exp = new Experience(startDate, endDate, jobTitle, location,
 				description);
 
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.addExperience(exp);
 		
 		tx.commit();
@@ -353,7 +359,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeExperience(e);
 		
 		tx.commit();
@@ -367,7 +373,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(e, LockModeType.OPTIMISTIC);
 		e.setStartDate(startDate);
 		
 		tx.commit();
@@ -380,7 +386,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(e, LockModeType.OPTIMISTIC);
 		e.setStartDate(endDate);
 		
 		tx.commit();
@@ -393,7 +399,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(e, LockModeType.OPTIMISTIC);
 		e.setJobTitle(jobTitle);
 		
 		tx.commit();
@@ -406,7 +412,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(e, LockModeType.OPTIMISTIC);
 		e.setLocation(location);
 		
 		tx.commit();
@@ -419,7 +425,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(e, LockModeType.OPTIMISTIC);
 		e.setDescription(description);
 		
 		tx.commit();
@@ -432,7 +438,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(c, LockModeType.OPTIMISTIC);
 		c.setCoursenum(coursenum);
 		
 		tx.commit();
@@ -445,7 +451,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(c, LockModeType.OPTIMISTIC);
 		c.setTitle(title);
 		
 		tx.commit();
@@ -458,7 +464,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(c, LockModeType.OPTIMISTIC);
 		c.setGrade(grade);
 		
 		tx.commit();
@@ -471,7 +477,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(c, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(c, LockModeType.OPTIMISTIC);
 		c.setSemester(semester);
 		
 		tx.commit();
@@ -484,7 +490,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.addApplication(a);
 		
 		tx.commit();
@@ -497,7 +503,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 		s.removeApplication(a);
 		
 		tx.commit();
@@ -510,7 +516,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);		
+		em.lock(s, LockModeType.OPTIMISTIC);		
 		s.getSettings().addProject(p);
 		
 		tx.commit();
@@ -523,7 +529,7 @@ public class StudentController {
 		}
 		tx.begin();
 		
-		em.lock(s, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(s, LockModeType.OPTIMISTIC);
 
 		s.getSettings().removeProject(p);
 		
@@ -535,11 +541,14 @@ public class StudentController {
 			return null;
 		}
 		try {
-			
+
+			EntityTransaction tx = em.getTransaction();
+			tx.begin();			
 			String query = "select a.applicationProject from APPLICATION A where a.studentApplicant = " 
 			+ s.getId();
-			
-			return (List<Long>) em.createQuery(query).getResultList();
+			List<Long> l = (List<Long>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+			tx.commit();
+			return l;
 		}
 		catch (Exception e){
 			
@@ -550,8 +559,12 @@ public class StudentController {
 	public static List<Student> getAllStudents(EntityManager em) {
         
         try {
+        EntityTransaction tx = em.getTransaction();
+       	tx.begin();
         String query = "select s from STUDENT s";
-        return (List<Student>) em.createQuery(query).getResultList();
+        List<Student> l = (List<Student>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
+        return l;
         }
         catch (Exception e){
         	return new ArrayList<Student>();

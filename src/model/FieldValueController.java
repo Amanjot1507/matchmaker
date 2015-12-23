@@ -50,14 +50,14 @@ public class FieldValueController{
 		if (value == null) {
 			return;
 		}
-		em.lock(value, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(value, LockModeType.OPTIMISTIC);
 		value.removeElements();
 		String description = value.getDescription();
 		String type = FieldFactory.getType(value);
 		
 		String query = "select a FROM LATESTADDITION a WHERE a.type = \""+type+"\" "
 				+ "AND a.name = \""+description+"\"";
-		List<LatestAddition> results = (List<LatestAddition>) em.createQuery(query).getResultList();
+		List<LatestAddition> results = (List<LatestAddition>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
 		try {
 			LatestAddition add = results.get(0);
 			em.remove(add);
@@ -73,12 +73,14 @@ public class FieldValueController{
 	 * Get Item of a given type by id.
 	 */
 	public static FieldValue getFieldValueById(EntityManager em, long id, String type) throws InstantiationException, IllegalAccessException{
-		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		String query = FieldFactory.getQuery(type) + " where m.id = " + id;
 		
         @SuppressWarnings("unchecked")
-        List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).getResultList();
+        List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	tx.commit();
         	return itens.get(0);
         }
         catch (Exception e) {
@@ -96,7 +98,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 
 		item.setDescription(newDescription);
 		
@@ -113,7 +115,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.addStudent(s);
 		
 		tx.commit();
@@ -128,7 +130,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.removeStudent(s);
 		
 		tx.commit();
@@ -144,7 +146,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.addResearcher(r);
 		
 		tx.commit();
@@ -161,7 +163,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.removeResearcher(r);
 		
 		tx.commit();
@@ -177,7 +179,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.addProject(p);
 		
 		tx.commit();
@@ -193,7 +195,7 @@ public class FieldValueController{
 		}
 		tx.begin();
 		
-		em.lock(item, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(item, LockModeType.OPTIMISTIC);
 		item.removeProject(p);
 		
 		tx.commit();
@@ -204,14 +206,17 @@ public class FieldValueController{
 	 */
 	public static String[] getArrayOfOfType(EntityManager em, String type) {
         String query = FieldFactory.getQuery(FieldFactory.createField(type, ""));
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
         try {
 			@SuppressWarnings("unchecked")
-			List<FieldValue> it = (List<FieldValue>) em.createQuery(query).getResultList();
+			List<FieldValue> it = (List<FieldValue>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
 			List<String> items = new LinkedList<String>();
 			for (FieldValue m : it) {
 				items.add(m.getDescription());
 			}
 			
+			tx.commit();
 			return (String[]) items.toArray();
         }
         catch (Exception e) {
@@ -223,10 +228,13 @@ public class FieldValueController{
 	 * Returns an array list of all item of given type. 
 	 */
 	public static List<FieldValue> getListOfType(EntityManager em, String type) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		String query = FieldFactory.getQuery(FieldFactory.createField(type, ""));
         try {
         	 @SuppressWarnings("unchecked")
-        	 List<FieldValue> items = (List<FieldValue>) em.createQuery(query).getResultList();
+        	 List<FieldValue> items = (List<FieldValue>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        	 tx.commit();
         	 return items;
         }
         catch (Exception e){
@@ -239,12 +247,15 @@ public class FieldValueController{
 	 */
 	public static FieldValue getItemByDescription(EntityManager em, 
 			String description, String type) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		System.out.println("Searching for "+type+": "+description);
         String query = FieldFactory.getQuery(type)+ 
         		" where m.description = \""+description+"\"";
 		@SuppressWarnings("unchecked")
-		List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).getResultList();
+		List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
 		try {
+			tx.commit();
 			return itens.get(0);
 		}
 		catch (Exception e) {
@@ -255,17 +266,22 @@ public class FieldValueController{
 	}
 	
 	public static List<LatestAddition> getLatestAddedFields(EntityManager em) {
-		
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		System.out.println("Looking up ALL additions");
 		String query = "select a from LATESTADDITION a";
-		List<LatestAddition> items = (List<LatestAddition>) em.createQuery(query).getResultList();
+		List<LatestAddition> items = (List<LatestAddition>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+		tx.commit();
 		return items;
 	}
 	
 	public static List<LatestAddition> getLatestAddedFields(EntityManager em, String type) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
 		System.out.println("Looking up all "+type+" additions");
 		String query = "select a from LATESTADDITION a where a.type = \""+type+"\"";
-		List<LatestAddition> items = (List<LatestAddition>) em.createQuery(query).getResultList();
+		List<LatestAddition> items = (List<LatestAddition>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+		tx.commit();
 		return items;
 	}
 	
@@ -289,9 +305,11 @@ public class FieldValueController{
 	 * Return a JSONObject with all items of a given type.
 	 */
 	public static JSONObject getItemJson(EntityManager em, String type) {
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
         String query = FieldFactory.getQuery(type);
 		@SuppressWarnings("unchecked")
-		List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).getResultList();
+		List<FieldValue> itens = (List<FieldValue>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
 		JSONArray jsonArray = new JSONArray();
 		for (FieldValue m : itens){
 			JSONObject jsonObject= new JSONObject();
@@ -310,6 +328,7 @@ public class FieldValueController{
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		tx.commit();
 		return items_obj;
 	}
 	/**

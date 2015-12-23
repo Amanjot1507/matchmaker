@@ -25,7 +25,7 @@ public class ResearcherController {
         				webpage, researchArea);
         ResearcherSettings settings = new ResearcherSettings();
         
-        em.lock(user, LockModeType.PESSIMISTIC_WRITE);
+        em.lock(user, LockModeType.OPTIMISTIC);
 
         r.setSettings(settings);
 		settings.setResearcher(r);
@@ -51,7 +51,7 @@ public class ResearcherController {
 		tx.begin();
 		if (r != null) {
 			// Delete projects if sole project leader
-			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(r, LockModeType.OPTIMISTIC);
 			List<Project> toDelete = r.removeProjects();
 			tx.commit();
 			for (Project p : toDelete) {
@@ -60,7 +60,7 @@ public class ResearcherController {
 				}
 			}
 			tx.begin();
-			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(r, LockModeType.OPTIMISTIC);
 			// Removes incoming pointers to researcher
 
 			/*
@@ -92,7 +92,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		
 		r.getSettings().addStudent(s);
 
@@ -106,7 +106,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.getSettings().removeStudent(s);
 		
 		tx.commit();
@@ -114,10 +114,11 @@ public class ResearcherController {
 	
 	public static Researcher getResearcherByNetID(EntityManager em, String netid) {
         EntityTransaction tx = em.getTransaction();
-        
+        tx.begin();
         String query = "select r from Researcher r where r.netID = \"" + netid +"\"";
-        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).getResultList();
+        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -126,10 +127,11 @@ public class ResearcherController {
 	}
 	public static List<Researcher> getResearcherList(EntityManager em) {
         EntityTransaction tx = em.getTransaction();
+        tx.begin();
         try {
         String query = "select r from Researcher r";
-        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).getResultList();
-        
+        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
+        tx.commit();
         	return mylist;
         }
         catch (Exception e) {
@@ -139,10 +141,11 @@ public class ResearcherController {
 
 	public static Researcher getResearcherByName(EntityManager em, String name) {
         EntityTransaction tx = em.getTransaction();
-        
+        tx.begin();
         String query = "select r from Researcher r where r.name = \"" + name +"\"";
-        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).getResultList();
+        List<Researcher> mylist = (List<Researcher>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	tx.commit();
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -157,7 +160,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.addProject(p);
 		
 		tx.commit();
@@ -170,7 +173,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.setName(name);
 		
 		tx.commit();
@@ -182,7 +185,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.setEmail(email);
 		
 		tx.commit();
@@ -194,7 +197,7 @@ public class ResearcherController {
 		}
 		tx.begin();
 		
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.setWebpage(webpage);
 		
 		tx.commit();
@@ -205,7 +208,7 @@ public class ResearcherController {
 		}
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.removeDepartments();
 		tx.commit();
 		System.out.println("Deleted all departments");
@@ -214,8 +217,7 @@ public class ResearcherController {
 
 		for (String id : idList){
 			if (id.length()>0){
-				try{
-			
+				try{		
 					addDepartment(em,r,(Department) FieldValueController.getFieldValueById(em,Long.parseLong(id),FieldFactory.DEPARTMENT));
 				}
 				catch(NumberFormatException e){
@@ -230,7 +232,7 @@ public class ResearcherController {
 			return;
 		}
 		tx.begin();
-		em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+		em.lock(r, LockModeType.OPTIMISTIC);
 		r.addDepartment(dep);
 
 		tx.commit();
@@ -241,7 +243,7 @@ public class ResearcherController {
 			}
 			EntityTransaction tx = em.getTransaction();
 			tx.begin();
-			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(r, LockModeType.OPTIMISTIC);
 			r.removeResearchAreas();
 			tx.commit();
 			String[] idList = ids.split(",");
@@ -266,7 +268,7 @@ public class ResearcherController {
 				return;
 			}
 			tx.begin();
-			em.lock(r, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(r, LockModeType.OPTIMISTIC);
 			r.addResearchArea(a);
 			tx.commit();
 		}

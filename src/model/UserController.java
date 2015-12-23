@@ -25,7 +25,7 @@ public class UserController {
 	public static void deleteUser(EntityManager em, User u) {
 	    EntityTransaction tx = em.getTransaction();
 		if (u != null) {
-			em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+			em.lock(u, LockModeType.OPTIMISTIC);
 			Student s = u.getStudent();
 			Researcher r = u.getResearcher();
 			System.out.println(s);
@@ -50,9 +50,18 @@ public class UserController {
 	
 	@SuppressWarnings("unchecked")
 	public static User findUser(EntityManager em, String netid) {
+		boolean flag = false;
+		EntityTransaction tx = em.getTransaction();
+		if(!tx.isActive()){
+			flag = true;
+			tx.begin();
+		}
 	    String query = "select s from USER s where s.netid = \"" + netid +"\"";
-        List<User> mylist = (List<User>) em.createQuery(query).getResultList();
+        List<User> mylist = (List<User>) em.createQuery(query).setLockMode(LockModeType.OPTIMISTIC).getResultList();
         try {
+        	if(flag == true)
+        	tx.commit();
+        
         	return mylist.get(0);
         }
         catch (Exception e) {
@@ -66,7 +75,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		u.setName(name);
 		tx.commit();
 	}
@@ -77,7 +86,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		u.setEmail(email);
 		tx.commit();
 	}
@@ -88,7 +97,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		u.setAdmin(makeAdmin);
 		tx.commit();
 	}
@@ -99,7 +108,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		u.setStudent(stud);
 		tx.commit();
 	}
@@ -110,7 +119,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		u.setResearcher(r);
 		tx.commit();
 	}
@@ -121,7 +130,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		Student s = u.setStudent(null);
 		em.remove(s);
 		tx.commit();
@@ -133,7 +142,7 @@ public class UserController {
 	    	return;
 	    }
 	    tx.begin();
-	    em.lock(u, LockModeType.PESSIMISTIC_WRITE);
+	    em.lock(u, LockModeType.OPTIMISTIC);
 		Researcher r = u.setResearcher(null);
 		em.remove(r);
 		tx.commit();
